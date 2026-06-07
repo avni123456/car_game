@@ -25,10 +25,11 @@ class Player(pygame.sprite.Sprite):
         self.x_vel = 0
         self.y_vel = 0
         self.mask = None
+        
     
     def move(self, dx,dy):
-        self.x_vel = +dx
-        self.y_vel = +dy
+        self.rect.x += dx
+        self.rect.y += dy
 
     def move_left(self, vel):
         self.x_vel = -vel
@@ -46,10 +47,12 @@ class Player(pygame.sprite.Sprite):
     
     def loop(self,fps):
         self.move(self.x_vel, self.y_vel)
-        self.update()
+        self.update()        
 
     def draw(self, win):
         pygame.draw.rect(win, self.COLOR, self.rect)
+
+        
 
 def get_background(name):
     #rearrange files and folders in assets then edit code below 
@@ -64,14 +67,11 @@ def get_background(name):
     return tiles, image
         
 
-def draw(window, background, bg_image, player, objects, offset_x, offset_y):
+def draw(window, background, bg_image, player):
     for tile in background:
         window.blit(bg_image, tile)
 
-    for obj in objects:
-        obj.draw(window, offset_x, offset_y)
-
-    player.draw(window, offset_x, offset_y)
+    player.draw(window)
 
     pygame.display.update()
 
@@ -80,9 +80,10 @@ def handle_move(player):
 
     player.y_vel = 0
     player.x_vel = 0
+
     if (keys[pygame.K_LEFT]) or (keys[pygame.K_a]):
         player.move_left(PLAYER_VEL)
-    if (keys[pygame.K_RIGHT]) or (keys[pygame.K_d] ):
+    if (keys[pygame.K_RIGHT]) or (keys[pygame.K_d]):
         player.move_right(PLAYER_VEL)
     if (keys[pygame.K_UP]) or (keys[pygame.K_w]):
         player.move_up(PLAYER_VEL)
@@ -94,16 +95,8 @@ def main(window):
     clock = pygame.time.Clock()
     background, bg_image = get_background("Brown.png")
 
-    block_size = 96
-
     player = Player(100, 100, 50, 50)
     
-
-    offset_x = 0
-    offset_y = 0
-    scroll_area_width = 200
-    scroll_area_height = 150
-    #blocks= [Block(0, HEIGHT - block_size, block_size)]
 
     run = True
     while run:
@@ -112,22 +105,11 @@ def main(window):
             if event.type == pygame.QUIT:
                 run = False
                 break
-        
-            if event.type == pygame.KEYDOWN:
-                if event.key == (pygame.K_SPACE and player.jump_count < 2) or (event.key == pygame.K_UP and player.jump_count < 2) or (event.key == pygame.K_w and player.jump_count < 2):
-                    player.jump() 
-
 
         player.loop(FPS)
         handle_move(player)
-        draw(window, background, bg_image, player, offset_x, offset_y)
+        draw(window, background, bg_image, player)
 
-        if ((player.rect.right - offset_x >= WIDTH - scroll_area_width) and player.x_vel > 0) or ((player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
-            offset_x += player.x_vel
-
-        if ((player.rect.top - offset_y >= HEIGHT - scroll_area_height) and player.y_vel > 0) or ((player.rect.bottom - offset_y <= scroll_area_height) and player.y_vel < 0):
-            offset_y += player.y_vel
-        
 
     pygame.quit()
     quit()
